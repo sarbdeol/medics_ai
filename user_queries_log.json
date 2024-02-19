@@ -1,0 +1,23 @@
+{"user_query": "Ask for live forex rates", "ai_response": "What is the exchange rate from [From Currency] to [To Currency] for [Amount] from [From Country] to [To Country]?"}
+{"user_query": "i want usd to inr exchange rates", "ai_response": "What is the exchange rate from **USD** to **INR** for **1 USD** from **United States** to **India**?"}
+{"user_query": "Ask for live forex rates", "ai_response": "What is the exchange rate from [From Currency] to [To Currency] for 1 from [From Country] to [To Country]?"}
+{"user_query": "i want usd to inr exchange rates", "ai_response": "What is the exchange rate from USD to INR for 1 USD to 1 INR?"}
+{"user_query": "What is the exchange rate from USD to INR for 1 USD to 1 INR?", "ai_response": "What is the exchange rate from USD to INR for 1 USD to 1 INR?"}
+{"user_query": "Ask for live forex rates", "ai_response": "To provide you with live forex rates, please specify the currencies you would like to inquire about (e.g., USD to EUR). Let me know your preferred currency pair, and I will generate the URL to fetch the latest rates for you."}
+{"user_query": "i want to know USD TO INR exchange rates", "ai_response": "Sure, to provide you with the latest USD to INR exchange rate, I will construct a URL for you to access the information. Please click on the following link to view the exchange rate:\n\n<a href='https://www.monito.com/en/compare/transfer/US/IN/USD/INR/1'>https://www.monito.com/en/compare/transfer/US/IN/USD/INR/1</a>"}
+{"user_query": "i want to know USD TO INR exchange rates", "ai_response": "To provide you with the USD to INR exchange rate, could you please confirm if you would like to convert 1 USD to INR?"}
+{"user_query": "i want to know USD TO INR exchange rates", "ai_response": "To provide you with the latest USD to INR exchange rate, please click on the following link: <a href='https://www.monito.com/en/compare/transfer/USA/India/USD/INR/1'>USD to INR Exchange Rate</a>"}
+{"user_query": "i want to know exchange rate usd to inr ", "ai_response": "To retrieve the exchange rate from USD to INR, you can use the following URL:\n\n**[https://www.monito.com/en/compare/transfer/us/in/usd/inr/1](https://www.monito.com/en/compare/transfer/us/in/usd/inr/1)**\n\nThis link will provide you with the most up-to-date exchange rate information."}
+{"user_query": "Ask for live forex rates", "ai_response": "Sure, please provide the currencies you want to check the exchange rate for (e.g., USD to EUR)."}
+{"user_query": "i want to usd to inr", "ai_response": "To check the exchange rate from USD to INR, you can visit the following link: \n\n**[Exchange Rate from USD to INR](https://www.monito.com/en/compare/transfer/us/in/usd/inr/1)**"}
+{"user_query": "i want usd to inr", "ai_response": "Please provide the country you are converting from and the country you are converting to for USD to INR exchange rate."}
+{"user_query": "i want usd to inr exchanges", "ai_response": "To get the exchange rate from USD to INR, you can visit the following link: \n\n**[Exchange Rate from USD to INR](https://www.monito.com/en/compare/transfer/us/in/usd/inr/1)**"}
+{"user_query": "this is sarb", "ai_response": "Please provide the specific currencies you want to check the exchange rate for (e.g., USD to EUR)."}
+{"user_query": "this is sarb", "ai_response": "What is the specific from currency and to currency you are interested in for checking the exchange rate?"}
+{"user_query": "this is sarb", "ai_response": "Please provide the specific from/to currency pair you are interested in for the forex rates query."}
+{"user_query": "this is sarb", "ai_response": "Please provide the specific currencies you are interested in for the forex rates query."}
+{"user_query": "this is sarb", "ai_response": "Please provide the specific currencies you want to inquire about for the forex rates."}
+{"user_query": "this is sarb", "ai_response": "Please provide the specific from currency and to currency you are interested in to check the exchange rate."}
+{"user_query": "this is sarb", "ai_response": "Please provide the specific from/to currency you are interested in for the forex rate query."}
+{"user_query": "sarb", "ai_response": "Could you please provide the specific from and to currencies for the forex rate you are looking for?"}
+{"user_query": "sarb", "ai_response": "Please provide the specific currencies you are interested in for the forex rate. For example, you can ask, \"What is the exchange rate from USD to EUR for 1 USD to EUR?\""}
