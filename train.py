@@ -40,7 +40,7 @@ def check_query(user_query):
     # user_query = "What is the price of bitcoin?"
 
     # Extract cryptocurrency names from the user query
-    cryptocurrencies = extract_cryptocurrency_name(user_query)
+    cryptocurrencies = extract_cryptocurrency_name(user_query.replace('rate',''))
    
     # Print extracted cryptocurrency names
     print("Extracted Cryptocurrencies:", cryptocurrencies[0])

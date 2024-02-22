@@ -193,10 +193,12 @@ def get_country_name(country):
             country_data.append('country data not available yet')
     return country_data
 
+
 @app.route('/get_ai_response', methods=['POST'])
 def get_ai_response():
     global intructions,currency_codes
     user_message1 = request.get_json().get('userMessage')
+    print(user_message1)
     # Log the user query
     log_data = {'user_query': user_message1}
     user_message=check_sentance(user_message1)
@@ -204,6 +206,8 @@ def get_ai_response():
     
     label_gpe=user_message.get('GPE')
     label_org=user_message.get('ORG')
+    
+
 
     ############# cbdc sections
     if label_gpe:
@@ -288,32 +292,43 @@ def get_ai_response():
                 extracted_url=extracted_url
             print(extracted_url)
             output =get_forex(extracted_url)
+            
             # output=user_msg(output,'')
             output=gpt(f'{output} \n\n\n provide info in well format ','if there is any url then attach it in anchor tag ')
             try:
                 output=format_text(output)
             except:
                 output=output
+            with open('user_queries_log.json', 'a') as log_file:
+                log_data['ai_response'] = output
+                json.dump(log_data, log_file)
+                log_file.write('\n')
             return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>').replace('###', '-->')})
     
     
-    elif user_message1 =='Ask who is selling crypto asset as what rate'or any(keyword in user_message1.upper() for keyword in ['crypto','bitcoin','crypto asset']):
-        role="Ask user to provide info if its not provide any crpto name which he want to know who is selling at what price \n\n under development mode"
+    elif user_message1 =='Ask who is selling crypto asset as what rate'or any(keyword in user_message1.lower() for keyword in ['crypto','bitcoin','crypto asset','current rate','current price']):
+        role="Ask user to provide info if its not provide any crpto name which he want to know price selling \n\n under development mode"
   
         # # Check if the user is asking for cryptocurrency price
-        if 'price' in user_message1.lower() and 'current' in user_message1.lower():
+        if 'price' in user_message1.lower() or  'current' in user_message1.lower():
             coin=check_query(user_message1.lower())
             print(coin)
             price = get_bitcoin_price(coin)
-            output=gpt(f'{user_message1}, = {price}','rewrite as answer')
+            if price is not None:
+                output=gpt(f'{user_message1}, = {price}','rewrite as answer')
+            else:
+                output=gpt(f' {user_message1} ,price= {price}','cant get price please provide full name of the crypto')
             
-        
         else:
             output=gpt(f'{user_message1}',role)
             try:
                 output=format_text(output)
             except:
                 output=output
+        with open('user_queries_log.json', 'a') as log_file:
+            log_data['ai_response'] = output
+            json.dump(log_data, log_file)
+            log_file.write('\n')
         return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>')})
     elif user_message1=='ruedex':
         print(intructions)
@@ -323,7 +338,23 @@ def get_ai_response():
             intructions=intructions
         return jsonify({'aiResponse': intructions.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>')})
     
-    # return jsonify({'aiResponse': output})
+    
+    else:
+        with open('user_queries_log.json', 'r') as log_file1:
+            # Parse the JSON data
+            lines = log_file1.readlines()
+
+            # Parse the last line as JSON
+            last_output = json.loads(lines[-1]) # Assuming the data is stored as a list
+
+            # Now you can work with the last row
+            print(last_output)
+        output=gpt(f'{user_message1}',f'this is answer of your last query {last_output}')
+        with open('user_queries_log.json', 'a') as log_file:
+            log_data['ai_response'] = output
+            json.dump(log_data, log_file)
+            log_file.write('\n')
+        return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>')})
 
 
 

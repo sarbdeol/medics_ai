@@ -21,3 +21,10 @@
 {"user_query": "this is sarb", "ai_response": "Please provide the specific from/to currency you are interested in for the forex rate query."}
 {"user_query": "sarb", "ai_response": "Could you please provide the specific from and to currencies for the forex rate you are looking for?"}
 {"user_query": "sarb", "ai_response": "Please provide the specific currencies you are interested in for the forex rate. For example, you can ask, \"What is the exchange rate from USD to EUR for 1 USD to EUR?\""}
+{"user_query": "What's the current rate for eth?", "ai_response": "What's the current rate for **Ethereum (ETH)**?"}
+{"user_query": "What's the current rate for eth?", "ai_response": "What's the current rate for Ethereum (ETH)?"}
+{"user_query": "What's the current rate for eth?", "ai_response": "What's the current rate for Ethereum (ETH)?"}
+{"user_query": "yes", "ai_response": "As of the latest available data, the current rate for Ethereum (ETH) is not available at the moment. Please feel free to ask about any other financial updates or information you may need."}
+{"user_query": "What's the current rate for Ethereum (ETH)?", "ai_response": "The current rate for Ethereum (ETH) is $2,988.83."}
+{"user_query": "What's the current rate for BNB?", "ai_response": "The current rate for BNB (Binance Coin) is $381.35."}
+{"user_query": "What's the current rate for Solana?", "ai_response": "The current rate for Solana is $105.97."}
