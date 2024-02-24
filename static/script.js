@@ -206,7 +206,7 @@ function selectSuggestion(userMessage) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ userMessage: userMessage })
+        body: JSON.stringify({ section: userMessage })
     })
     .then(response => response.json())
     .then(data => {
@@ -254,3 +254,14 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("button-group-2").classList.add("bubble-up");
 });
 
+
+// Add event listener for page refresh
+window.onbeforeunload = function() {
+    // Send request to clear session
+    fetch('/clear_session', {
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => console.log(data.message))
+    .catch(error => console.error('Error:', error));
+};

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request,session, jsonify, redirect, url_for
 import openai
 import json
 from bs4 import BeautifulSoup
@@ -6,11 +6,16 @@ from train import check_query
 import requests
 import yfinance as yf
 from data_get import get_forex
-import re
+import re,os
 from datetime import datetime
+from flask_session import Session
 from google_bard_api import user_msg
 from google_search import google_search
 from data import check_sentance
+# from place_project_bid import sample_place_project_bid
+
+
+
 
 # Get today's date
 today_date = datetime.today().strftime('%Y-%m-%d')
@@ -29,6 +34,7 @@ with open(json_file_path, "r") as file:
 with open(cbdc_file_path, "r") as file:
     # Read the contents of the file
     cbdc_data = json.load(file)
+
 currency_codes = [
         'AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN',
         'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BRL',
@@ -100,7 +106,20 @@ def get_bitcoin_price(coin):
 @app.route('/')
 def index():
     return render_template('chat.html')
+@app.route('/exchanges/<exchange_name>')
+def exchange(exchange_name):
+    url = f"https://api.coingecko.com/api/v3/exchanges/{exchange_name}"
 
+    payload = {}
+    headers = {
+        'Cookie': '__cf_bm=75cxtdvhpMZ1Z.3km5_LJ71c9hKGkZlm1RYwjDcbaA8-1708767959-1.0-AStyAoTVjVrmKf+tDkVVeRC+OlS5v65iPxatKADUjdZD3+anvDaExEuqelyRBIwV/HBcwnI6R2YP/2I3hZe2T4c='
+    }
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+
+    binance_data = response.json()
+    print(binance_data)
+    return render_template('table.html', binance_data=binance_data)
 def rewrite(user_message):
     url = "https://api.openai.com/v1/chat/completions"
     payload = json.dumps({
@@ -193,19 +212,30 @@ def get_country_name(country):
             country_data.append('country data not available yet')
     return country_data
 
-
 @app.route('/get_ai_response', methods=['POST'])
 def get_ai_response():
     global intructions,currency_codes
+    section=request.get_json().get('section')
+    # Save section in session
+    if section:
+        session['section'] = section
+    print('session',session['section'])
     user_message1 = request.get_json().get('userMessage')
     print(user_message1)
-    # Log the user query
-    log_data = {'user_query': user_message1}
-    user_message=check_sentance(user_message1)
-    print(user_message)
+    if user_message1:
+        # Log the user query
+        user_message=check_sentance(user_message1)
+        print(user_message)
+        label_gpe=user_message.get('GPE')
+        label_org=user_message.get('ORG')
+        log_data = {'user_query': user_message1}
+       
+    else:
+        label_gpe=''
+        label_org=''
+        user_message1=''
+        log_data = {'user_query': section}
     
-    label_gpe=user_message.get('GPE')
-    label_org=user_message.get('ORG')
     
 
 
@@ -224,7 +254,7 @@ def get_ai_response():
         except:
             output=output
         return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>')})
-    elif label_org and any(keyword in user_message1.lower() for keyword in ['cbdc','banks','bank','central','digital','Query Central Bank Digital Currencies']):
+    elif session['section']=='Query Central Bank Digital Currencies' or label_org and any(keyword in user_message1.lower() for keyword in ['cbdc','banks','bank','central','digital','Query Central Bank Digital Currencies']):
             role=f"Ask user which cbdc country data he wants"
             output=gpt(f'{user_message1}',role)
             # Log the AI response
@@ -242,7 +272,7 @@ def get_ai_response():
     
     
     #### FCA 
-    elif user_message1=='Query FCA registered digital asset companies' or any(keyword in user_message1.lower() for keyword in ['Ltd','LTD','Limited','firm','company','fca','assets']):
+    elif session['section']=='Query FCA registered digital asset companies' or any(keyword in user_message1.lower() for keyword in ['Ltd','LTD','Limited','firm','company','fca','assets']):
         role=f"Ask user to provide full Firm name for checking if its registered or not in FCA registered digital asset companies ,If user provide name then check here is data {firms_data}"
         output=gpt(f'{user_message1}',role)
         with open('user_queries_log.json', 'a') as log_file:
@@ -259,7 +289,7 @@ def get_ai_response():
     # FOREX
     
 
-    elif user_message1=='Ask for live forex rates' or any(keyword in user_message1.lower() for keyword in ['forex','exchange','exchange rate','usd','inr','eur','gbp']) or any(keyword2 == user_message1.upper() for keyword2 in currency_codes):
+    elif session['section']=='Ask for live forex rates' or any(keyword in user_message1.lower() for keyword in ['forex','usd','inr','eur','gbp']) or any(keyword2 == user_message1.upper() for keyword2 in currency_codes):
         print('forex')
         role="ask user for one time from/to currency and add parameter to this url  https://www.monito.com/en/compare/transfer/{from_country}/{to_country}/{from_currency}/{to_currency}/1 amount always 1 and return url and no confirm again (usa will be us) and use same correncies country codes for to and from country"
         output=gpt(f'{user_message1}',role)
@@ -306,29 +336,30 @@ def get_ai_response():
             return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>').replace('###', '-->')})
     
     
-    elif user_message1 =='Ask who is selling crypto asset as what rate'or any(keyword in user_message1.lower() for keyword in ['crypto','bitcoin','crypto asset','current rate','current price']):
-        role="Ask user to provide info if its not provide any crpto name which he want to know price selling \n\n under development mode"
-  
-        # # Check if the user is asking for cryptocurrency price
-        if 'price' in user_message1.lower() or  'current' in user_message1.lower():
-            coin=check_query(user_message1.lower())
-            print(coin)
-            price = get_bitcoin_price(coin)
-            if price is not None:
-                output=gpt(f'{user_message1}, = {price}','rewrite as answer')
-            else:
-                output=gpt(f' {user_message1} ,price= {price}','cant get price please provide full name of the crypto')
+    elif session['section'] =='Ask who is selling crypto asset as what rate' or any(keyword in user_message1.lower() for keyword in ['crypto','bitcoin','crypto asset','current rate','current price']):
+        role="Ask user to provide crypto exchange name \n\n eg : (Binance)"
+        # Load exchange data from JSON file
+        if user_message1:
+            with open('exchange_names.json', 'r') as f:
+                exchange_data = json.load(f)
+            matched_exchange = None
+            for exchange in exchange_data:
+                if  user_message1.lower() in exchange["name"].lower():
+                    matched_exchange = exchange
+                    break
+
+            # If a matching exchange is found, use its ID to get the table
+            if matched_exchange:
+                exchange_id = matched_exchange["id"]
+            # Check if "binance" is in the user's message
             
+                # Provide a clickable link to the Binance exchange page
+                output = f'<a href="{url_for("exchange", exchange_name=exchange_id)}">Sure, here is the link to view {exchange["name"]}</a>'
+                return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>')})
+            else:
+                output='No exchange found in our records'
         else:
-            output=gpt(f'{user_message1}',role)
-            try:
-                output=format_text(output)
-            except:
-                output=output
-        with open('user_queries_log.json', 'a') as log_file:
-            log_data['ai_response'] = output
-            json.dump(log_data, log_file)
-            log_file.write('\n')
+            output=gpt(section,role)
         return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>')})
     elif user_message1=='ruedex':
         print(intructions)
@@ -350,8 +381,9 @@ def get_ai_response():
             # Now you can work with the last row
             print(last_output)
         output=gpt(f'{user_message1}',f'this is answer of your last query {last_output}')
+        log_data['ai_response'] = output
         with open('user_queries_log.json', 'a') as log_file:
-            log_data['ai_response'] = output
+            
             json.dump(log_data, log_file)
             log_file.write('\n')
         return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>')})
@@ -359,4 +391,8 @@ def get_ai_response():
 
 
 if __name__ == '__main__':
+    
+    app.secret_key = os.urandom(24)  # Use a more secure method to generate a secret key
+    app.config['SESSION_TYPE'] = 'filesystem'  # Choose an appropriate session type
+    Session(app)
     app.run(debug=True)
