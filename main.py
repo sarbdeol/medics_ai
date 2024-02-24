@@ -129,8 +129,9 @@ def rewrite(user_message):
         "messages": [
                     {"role": "system", "content": f"Today date is {today_date}"},
                     {"role": "user","content": f"Re write {user_message}"},
-                    {"role": "system","content": "if there is url under the message then  make it under <a> tag</a> and bold black color and also bold text which is after ###  (eg :### Introduction to CBDCs\n\n)"},
-                    {"role": "system","content": "make this type of text  -** ** under <a> text </a>"}]
+                    {"role": "system","content": "if there is https url under the message then  Generate HTML code to create a link and bold black color and also bold text which is after ###  (eg :### Introduction to CBDCs\n\n)"},
+                    {"role": "system","content": "make this type of text  -** ** under <a href='text'> text </a>"},
+                    {"role": "system","content": "Generate HTML code to create a link add every url under html a tag"}]
     })
     headers = {
         'Content-Type': 'application/json',
@@ -165,8 +166,8 @@ def gpt(user_message,role):
                         {"role": "system", "content": f"intructions :{intructions}"},
                         {"role": "system", "content": f"Today date is {today_date}"},
                         {"role": "user","content": user_message},
-                        {"role": "system","content": "if there is url under the message then  make it under <a href='url'> url </a> and bold black color and also bold text which is after ###  (eg :### Introduction to CBDCs\n\n)"},
                         {"role": "system","content": "dont repeat user query"},
+                        {"role": "system","content": "always give response in html code and url opwn in new tab ignore"},
                         {"role": "system","content": role}]
         })
         headers = {
@@ -193,8 +194,8 @@ def format_text(text):
     # Underline text within double underscores
     text = re.sub(r'__(.*?)__', r'<u>\1</u>', text)
     
-    # Replace new lines with <br> tags
-    text = text.replace('\n', '<br>')
+    # Replace new lines with '' tags
+    text = text.replace('\n', " ")
     
     return text
 def get_country_name(country):
@@ -253,7 +254,7 @@ def get_ai_response():
             output=format_text(output)
         except:
             output=output
-        return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>')})
+        return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
     elif session['section']=='Query Central Bank Digital Currencies' or label_org and any(keyword in user_message1.lower() for keyword in ['cbdc','banks','bank','central','digital','Query Central Bank Digital Currencies']):
             role=f"Ask user which cbdc country data he wants"
             output=gpt(f'{user_message1}',role)
@@ -266,7 +267,7 @@ def get_ai_response():
                 output=format_text(output)
             except:
                 output=output
-            return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>')})
+            return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
     
     
     
@@ -282,7 +283,7 @@ def get_ai_response():
             output=format_text(output)
         except:
             output=output
-        return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>')})
+        return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
     
 
 
@@ -310,7 +311,7 @@ def get_ai_response():
             # Check if any URLs were found
             if urls:
                 # Assuming there is only one URL in the text, extract the first one
-                extracted_url = urls[0].replace('"','').replace(')**','').replace('**','').replace(')','').replace('%20','')
+                extracted_url = urls[0].replace('"','').replace(')**','').replace('**','').replace(')','').replace('%20','').replace('```html','').replace('```','')
                 
             else:
                 print("No URL found in the text.")
@@ -333,7 +334,7 @@ def get_ai_response():
                 log_data['ai_response'] = output
                 json.dump(log_data, log_file)
                 log_file.write('\n')
-            return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>').replace('###', '-->')})
+            return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('###', '-->').replace('```html','').replace('```','')})
     
     
     elif session['section'] =='Ask who is selling crypto asset as what rate' or any(keyword in user_message1.lower() for keyword in ['crypto','bitcoin','crypto asset','current rate','current price']):
@@ -355,19 +356,19 @@ def get_ai_response():
             
                 # Provide a clickable link to the Binance exchange page
                 output = f'<a href="{url_for("exchange", exchange_name=exchange_id)}">Sure, here is the link to view {exchange["name"]}</a>'
-                return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>')})
+                return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
             else:
                 output='No exchange found in our records'
         else:
             output=gpt(section,role)
-        return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>')})
+        return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
     elif user_message1=='ruedex':
         print(intructions)
         try:
             intructions=format_text(intructions)
         except:
             intructions=intructions
-        return jsonify({'aiResponse': intructions.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>')})
+        return jsonify({'aiResponse': intructions.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
     
     
     else:
@@ -386,7 +387,7 @@ def get_ai_response():
             
             json.dump(log_data, log_file)
             log_file.write('\n')
-        return jsonify({'aiResponse': output.replace('\n', '<br>').replace('* **', '<strong>').replace('**', '</strong>')})
+        return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
 
 
 
