@@ -63,7 +63,7 @@ def get_forex(url):
             all_data.append(box_data)
             count+=1
     # Write the data to a JSON file
-    with open('forex.json', 'w') as f:
+    with open('/home/ubuntu/ruedex_ai/forex.json', 'w') as f:
         json.dump(all_data, f, indent=4)
 
     print("Data written to data.json")

@@ -5,8 +5,8 @@ $ pip install google-generativeai
 """
 from datetime import datetime
 import json
-json_file_path = "firms_data.json"
-cbdc_file_path='cbdc.json'
+json_file_path = "/home/ubuntu/ruedex_ai/firms_data.json"
+cbdc_file_path='/home/ubuntu/ruedex_ai/creds.json'
 # Open the JSON file for reading
 with open(json_file_path, "r") as file:
     # Read the contents of the file

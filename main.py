@@ -11,7 +11,7 @@ from datetime import datetime
 from flask_session import Session
 from google_bard_api import user_msg
 from google_search import google_search
-from data import check_sentance
+from check import check_sentance
 # from place_project_bid import sample_place_project_bid
 
 
@@ -24,8 +24,8 @@ app = Flask(__name__)
 API_URL = "http://13.49.0.68:5000/cbdctracker_scraper"
 # Set your OpenAI API key
 openai.api_key = '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'
-json_file_path = "firms_data.json"
-cbdc_file_path='cbdc.json'
+json_file_path = "/home/ubuntu/ruedex_ai/firms_data.json"
+cbdc_file_path='/home/ubuntu/ruedex_ai/cbdc.json'
 # Open the JSON file for reading
 with open(json_file_path, "r") as file:
     # Read the contents of the file
@@ -165,10 +165,10 @@ def gpt(user_message,role):
             "messages": [
                         {"role": "system", "content": f"intructions :{intructions}"},
                         {"role": "system", "content": f"Today date is {today_date}"},
-                        {"role": "user","content": user_message},
                         {"role": "system","content": "dont repeat user query"},
-                        {"role": "system","content": "always give response in html code and url opwn in new tab ignore"},
-                        {"role": "system","content": role}]
+                        {"role": "user","content": user_message},
+                        {"role": "system","content": role},
+                        {"role": "user","content": "always give response in html template and url open in new tab ignore html tag"}]
         })
         headers = {
             'Content-Type': 'application/json',
@@ -227,8 +227,12 @@ def get_ai_response():
         # Log the user query
         user_message=check_sentance(user_message1)
         print(user_message)
-        label_gpe=user_message.get('GPE')
-        label_org=user_message.get('ORG')
+        try:
+            label_gpe=user_message.get('country')
+            label_org=user_message.get('ORG')
+        except:
+            label_gpe=''
+            label_org=''
         log_data = {'user_query': user_message1}
        
     else:
@@ -241,13 +245,13 @@ def get_ai_response():
 
 
     ############# cbdc sections
-    if label_gpe:
+    if session['section']=='Query Central Bank Digital Currencies' and label_gpe:
         cbdc_data=get_country_name(label_gpe)
         role=f"Here is CBDCs country data {cbdc_data}, Analyze the data and share as updates ."
         output=gpt(f'{user_message1}',role)
         # Log the AI response
         log_data['ai_response'] = output
-        with open('user_queries_log.json', 'a') as log_file:
+        with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
             json.dump(log_data, log_file)
             log_file.write('\n')
         try:
@@ -260,7 +264,7 @@ def get_ai_response():
             output=gpt(f'{user_message1}',role)
             # Log the AI response
             log_data['ai_response'] = output
-            with open('user_queries_log.json', 'a') as log_file:
+            with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
                 json.dump(log_data, log_file)
                 log_file.write('\n')
             try:
@@ -276,7 +280,7 @@ def get_ai_response():
     elif session['section']=='Query FCA registered digital asset companies' or any(keyword in user_message1.lower() for keyword in ['Ltd','LTD','Limited','firm','company','fca','assets']):
         role=f"Ask user to provide full Firm name for checking if its registered or not in FCA registered digital asset companies ,If user provide name then check here is data {firms_data}"
         output=gpt(f'{user_message1}',role)
-        with open('user_queries_log.json', 'a') as log_file:
+        with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
             log_data['ai_response'] = output
             log_file.write('\n')
         try:
@@ -294,7 +298,7 @@ def get_ai_response():
         print('forex')
         role="ask user for one time from/to currency and add parameter to this url  https://www.monito.com/en/compare/transfer/{from_country}/{to_country}/{from_currency}/{to_currency}/1 amount always 1 and return url and no confirm again (usa will be us) and use same correncies country codes for to and from country"
         output=gpt(f'{user_message1}',role)
-        with open('user_queries_log.json', 'a') as log_file:
+        with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
             log_data['ai_response'] = output
             json.dump(log_data, log_file)
             log_file.write('\n')
@@ -330,7 +334,7 @@ def get_ai_response():
                 output=format_text(output)
             except:
                 output=output
-            with open('user_queries_log.json', 'a') as log_file:
+            with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
                 log_data['ai_response'] = output
                 json.dump(log_data, log_file)
                 log_file.write('\n')
@@ -341,7 +345,7 @@ def get_ai_response():
         role="Ask user to provide crypto exchange name \n\n eg : (Binance)"
         # Load exchange data from JSON file
         if user_message1:
-            with open('exchange_names.json', 'r') as f:
+            with open('/home/ubuntu/ruedex_ai/exchange_names.json.json', 'r') as f:
                 exchange_data = json.load(f)
             matched_exchange = None
             for exchange in exchange_data:
@@ -372,7 +376,7 @@ def get_ai_response():
     
     
     else:
-        with open('user_queries_log.json', 'r') as log_file1:
+        with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'r') as log_file1:
             # Parse the JSON data
             lines = log_file1.readlines()
 
@@ -383,7 +387,7 @@ def get_ai_response():
             print(last_output)
         output=gpt(f'{user_message1}',f'this is answer of your last query {last_output}')
         log_data['ai_response'] = output
-        with open('user_queries_log.json', 'a') as log_file:
+        with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
             
             json.dump(log_data, log_file)
             log_file.write('\n')
@@ -396,4 +400,15 @@ if __name__ == '__main__':
     app.secret_key = os.urandom(24)  # Use a more secure method to generate a secret key
     app.config['SESSION_TYPE'] = 'filesystem'  # Choose an appropriate session type
     Session(app)
-    app.run(debug=True)
+    # app.run(debug=True,port=5000)
+    app.run(host='0.0.0.0', port=5000,debug=True)
+
+
+
+
+
+
+
+
+
+
