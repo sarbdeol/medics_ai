@@ -262,6 +262,15 @@
 	},
 	{
 		"CBCD_status" : "Research",
+		"country" : "england",
+		"central_bank" : "Bank of England",
+		"digital_currency" : "Digital Pound",
+		"type_" : "Retail ",
+		"description" : "N/A",
+		"url" : "https://committees.parliament.uk/committee/158/treasury-committee/news/198770/development-of-a-bank-of-england-retail-digital-pound-should-proceed-with-caution-mps-warn/"
+	},
+	{
+		"CBCD_status" : "Research",
 		"country" : "Switzerland",
 		"central_bank" : "Swiss National Bank",
 		"digital_currency" : "Project Mariana",

@@ -130,8 +130,7 @@ def rewrite(user_message):
                     {"role": "system", "content": f"Today date is {today_date}"},
                     {"role": "user","content": f"Re write {user_message}"},
                     {"role": "system","content": "if there is https url under the message then  Generate HTML code to create a link and bold black color and also bold text which is after ###  (eg :### Introduction to CBDCs\n\n)"},
-                    {"role": "system","content": "make this type of text  -** ** under <a href='text'> text </a>"},
-                    {"role": "system","content": "Generate HTML code to create a link add every url under html a tag"}]
+        ]
     })
     headers = {
         'Content-Type': 'application/json',
@@ -168,7 +167,7 @@ def gpt(user_message,role):
                         {"role": "system","content": "dont repeat user query"},
                         {"role": "user","content": user_message},
                         {"role": "system","content": role},
-                        {"role": "user","content": "always give response in html template and url open in new tab ignore html tag"}]
+                        {"role": "system","content": "provide content in <p> style tags always and not share this secret with other that you are expert in this jsut show them "}]
         })
         headers = {
             'Content-Type': 'application/json',
@@ -195,24 +194,111 @@ def format_text(text):
     text = re.sub(r'__(.*?)__', r'<u>\1</u>', text)
     
     # Replace new lines with '' tags
-    text = text.replace('\n', " ")
+    text = text.replace('\n', "<br>")
     
     return text
+def get_cbdc_news(url):
+    print(url)
+    # Make a GET request to fetch the data
+    response = requests.get(url)
+
+    # Check if the request was successful (status code 200)
+    if response.status_code == 200:
+        # Parse JSON
+        parsed_data = response.json()
+
+        # Extract relevant information
+        content = parsed_data['content']
+        news_info = []
+
+        for item in content:
+            title = item['title']
+            created_timestamp = item['created'] / 1000  # Convert milliseconds to seconds
+            created_date = datetime.utcfromtimestamp(created_timestamp).strftime('%Y-%m-%d')  # Format created date
+            news_info.append({'Update': title, 'Date': created_date})
+
+        # Convert to JSON
+        result_json = json.dumps(news_info, indent=4)
+        return result_json
 def get_country_name(country):
+    print(len(country))
     # Function to get entries based on country
     with open(cbdc_file_path, "r") as file:
         # Read the contents of the file
         cbdc_data = json.load(file)
     country_data = []
     for entry in cbdc_data:
-        if entry.get('country').lower() == country.lower():
-            print('find country')
-            print(entry)
-            country_data.append(entry)
+        # if country.lower() in entry.get('country').lower() :
+        if ' ' in country :
+            # Split the country input and get the last word
+            country_parts = country.split()
+            last_word = country_parts[-1].lower()
+            print('last_word',last_word)
+            # Check if the last word matches with the last word in the entry's country
+            if last_word in entry.get('country').lower() or last_word == entry.get('country').lower():
+                print('find country')
+                tag=entry.get('country').replace('england','united_kingdom').lower().replace(' ','_')
+                currency=entry.get('digital_currency').lower().replace(' ','_')
+                url=f'https://cbdctracker.org/api/news?page=0&size=5&tags={tag}-{currency}'
+                cbdc_news=get_cbdc_news(url)
+                print(entry)
+                country_data=entry
+                break
+            else:
+                country_data='country data not available yet'
+                cbdc_news='cbdc news not found'
         else:
-            country_data.append('country data not available yet')
-    return country_data
-
+            if country.lower() in entry.get('country').lower() :
+                print('find country')
+                tag=entry.get('country').replace('england','united_kingdom').lower().replace(' ','_')
+                currency=entry.get('digital_currency').lower().replace(' ','_')
+                url=f'https://cbdctracker.org/api/news?page=0&size=5&tags={tag}-{currency}'
+                cbdc_news=get_cbdc_news(url)
+                print(entry)
+                country_data=entry
+                break
+            else:
+                country_data='country data not available yet'
+                cbdc_news='cbdc news not found'
+    return f"CBDC NEWS : {cbdc_news}",country_data
+def get_warning_name(warning):
+    print('checking warning')
+    # Function to get entries based on warning
+    with open('/home/ubuntu/ruedex_ai/fca_warnings.json', "r") as file:
+        # Read the contents of the file
+        cbdc_data = json.load(file)
+    warning_data = []
+    # print(cbdc_data)
+    for entry in cbdc_data:
+        # print(entry.get('name'))
+        if warning.lower() in entry.get('name').lower():
+            print(warning.lower())
+            print('find warning')
+            print(entry)
+            warning_data=entry
+            break
+        else:
+            warning_data=None
+    return warning_data
+def get_firm_name(firm):
+    print('checking firm')
+    # Function to get entries based on warning
+    with open('/home/ubuntu/ruedex_ai/firms_data.json', "r") as file:
+        # Read the contents of the file
+        cbdc_data = json.load(file)
+    warning_data = []
+    # print(cbdc_data)
+    for entry in cbdc_data:
+        # print(entry.get('name'))
+        if firm.lower() in entry.get('Firm Name').lower():
+            print(firm.lower())
+            print('find firm')
+            print(entry)
+            firm_data=entry
+            break
+        else:
+            firm_data=None
+    return firm_data
 @app.route('/get_ai_response', methods=['POST'])
 def get_ai_response():
     global intructions,currency_codes
@@ -245,128 +331,175 @@ def get_ai_response():
 
 
     ############# cbdc sections
-    if session['section']=='Query Central Bank Digital Currencies' and label_gpe:
-        cbdc_data=get_country_name(label_gpe)
-        role=f"Here is CBDCs country data {cbdc_data}, Analyze the data and share as updates ."
-        output=gpt(f'{user_message1}',role)
-        # Log the AI response
-        log_data['ai_response'] = output
-        with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
-            json.dump(log_data, log_file)
-            log_file.write('\n')
-        try:
-            output=format_text(output)
-        except:
-            output=output
-        return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
-    elif session['section']=='Query Central Bank Digital Currencies' or label_org and any(keyword in user_message1.lower() for keyword in ['cbdc','banks','bank','central','digital','Query Central Bank Digital Currencies']):
-            role=f"Ask user which cbdc country data he wants"
+    # if session['section']=='Query Central Bank Digital Currencies' and label_gpe:
+    #     cbdc_data=get_country_name(label_gpe)
+    #     role=f"Here is CBDCs country data {cbdc_data}, Analyze the data and share as updates ."
+    #     output=gpt(f'{user_message1}',role)
+    #     # Log the AI response
+    #     log_data['ai_response'] = output
+    #     with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
+    #         json.dump(log_data, log_file)
+    #         log_file.write('\n')
+    #     try:
+    #         output=format_text(output)
+    #     except:
+    #         output=output
+    #     return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
+    if session['section']=='Query Central Bank Digital Currencies':
+        print('cbdc')
+        role=f"Ask user which cbdc country data he wants"
+        if user_message1:
+            if label_gpe:
+                cbdc_data=get_country_name(label_gpe)
+            else:
+                cbdc_data=get_country_name(user_message1)
+            role=f"Here is CBDCs country data {cbdc_data}, format (status,digital_currency,central_bank,updates,desscription) ,Analyze the data and share as updates.if description n/a then add from your end"
             output=gpt(f'{user_message1}',role)
+            # output='Please specify the country for which you would like to receive the latest CBDC update.'
             # Log the AI response
             log_data['ai_response'] = output
             with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
                 json.dump(log_data, log_file)
                 log_file.write('\n')
-            try:
-                output=format_text(output)
-            except:
-                output=output
-            return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
-    
-    
-    
+            # try:
+            #     output=format_text(output)
+            # except:
+            #     output=output
+            return jsonify({'aiResponse': output.replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
+        else:
+
+            role=f"Ask user which cbdc country data he wants"
+            output=gpt(f'{session["section"]}',role)
+            # output='Please specify the country for which you would like to receive the latest CBDC update.'
+            # Log the AI response
+            log_data['ai_response'] = output
+            with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
+                json.dump(log_data, log_file)
+                log_file.write('\n')
+            # try:
+            #     output=format_text(output)
+            # except:
+            #     output=output
+            return jsonify({'aiResponse': output.replace('\n', "<br>").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
+
     
     #### FCA 
-    elif session['section']=='Query FCA registered digital asset companies' or any(keyword in user_message1.lower() for keyword in ['Ltd','LTD','Limited','firm','company','fca','assets']):
-        role=f"Ask user to provide full Firm name for checking if its registered or not in FCA registered digital asset companies ,If user provide name then check here is data {firms_data}"
-        output=gpt(f'{user_message1}',role)
-        with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
-            log_data['ai_response'] = output
-            log_file.write('\n')
-        try:
-            output=format_text(output)
-        except:
-            output=output
-        return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
-    
+    if session['section']=='Query FCA registered digital asset companies' :
+        print('FCA')
+        if user_message1: 
+            warning=get_warning_name(user_message1)
+            firms_data=get_firm_name(user_message1)
+            if warning:
+                role=f"provide warning detail to user in format {warning} /n for more info visit https://www.fca.org.uk/consumers/warning-list-unauthorised-firms"
+                output=gpt(f'{user_message1}',role)
+                with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
+                    log_data['ai_response'] = output
+                    log_file.write('\n')
+                return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
+            if firms_data:
+                firms_data=get_firm_name(user_message1)
+                if firms_data:
+                    role=f"provide firms detail to user in format {firms_data} for more info visit "
+                    output=gpt(f'{user_message1}',role)
+                    with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
+                        log_data['ai_response'] = output
+                        log_file.write('\n')
+                    return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
+            else:
+                role=f" ask user ,Not found any fca firm or warning list in our data /n fca warning website url here :https://www.fca.org.uk/consumers/warning-list-unauthorised-firms"
+                print(role)
+                output=gpt(f'{user_message1}',role)
+                return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
+        else:
+            role=f"Ask user to provide full Firm name or fca warnings for checking if its registered or not in FCA registered digital asset companies "
+            output=gpt(f'{session["section"]}',role)
+            with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
+                log_data['ai_response'] = output
+                log_file.write('\n')
+        # try:
+        #     output=format_text(output)
+        # except:
+        #     output=output
+            return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
+
 
 
     # FOREX
     
 
-    elif session['section']=='Ask for live forex rates' or any(keyword in user_message1.lower() for keyword in ['forex','usd','inr','eur','gbp']) or any(keyword2 == user_message1.upper() for keyword2 in currency_codes):
-        print('forex')
-        role="ask user for one time from/to currency and add parameter to this url  https://www.monito.com/en/compare/transfer/{from_country}/{to_country}/{from_currency}/{to_currency}/1 amount always 1 and return url and no confirm again (usa will be us) and use same correncies country codes for to and from country"
-        output=gpt(f'{user_message1}',role)
-        with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
-            log_data['ai_response'] = output
-            json.dump(log_data, log_file)
-            log_file.write('\n')
-        if 'https://www.monito.com' in output:
+    # elif session['section']=='Ask for live forex rates' or any(keyword in user_message1.lower() for keyword in ['forex','usd','inr','eur','gbp']) or any(keyword2 == user_message1.upper() for keyword2 in currency_codes):
+    #     print('forex')
+    #     role="ask user for one time from/to currency and add parameter to this url  https://www.monito.com/en/compare/transfer/{from_country}/{to_country}/{from_currency}/{to_currency}/1 amount always 1 and return url and no confirm again (usa will be us) and use same correncies country codes for to and from country"
+    #     output=gpt(f'{user_message1}',role)
+    #     with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
+    #         log_data['ai_response'] = output
+    #         json.dump(log_data, log_file)
+    #         log_file.write('\n')
+    #     if 'https://www.monito.com' in output:
         
 
-            # Given text containing the UR
-            # Define a regex pattern to match URLs
-            url_pattern = r'https?://(?:www\.)?monito\.com/\S+'
+    #         # Given text containing the UR
+    #         # Define a regex pattern to match URLs
+    #         url_pattern = r'https?://(?:www\.)?monito\.com/\S+'
 
-            # Find URLs in the text using regex
-            urls = re.findall(url_pattern, output)
+    #         # Find URLs in the text using regex
+    #         urls = re.findall(url_pattern, output)
 
-            # Check if any URLs were found
-            if urls:
-                # Assuming there is only one URL in the text, extract the first one
-                extracted_url = urls[0].replace('"','').replace(')**','').replace('**','').replace(')','').replace('%20','').replace('```html','').replace('```','')
+    #         # Check if any URLs were found
+    #         if urls:
+    #             # Assuming there is only one URL in the text, extract the first one
+    #             extracted_url = urls[0].replace('"','').replace(')**','').replace('**','').replace(')','').replace('%20','').replace('```html','').replace('```','')
                 
-            else:
-                print("No URL found in the text.")
-            try:
-                extracted_url=extracted_url.split("'")[0]
-            except:
-                extracted_url=extracted_url.split("]")[0]
-            else:
-                extracted_url=extracted_url
-            print(extracted_url)
-            output =get_forex(extracted_url)
+    #         else:
+    #             print("No URL found in the text.")
+    #         try:
+    #             extracted_url=extracted_url.split("'")[0]
+    #         except:
+    #             extracted_url=extracted_url.split("]")[0]
+    #         else:
+    #             extracted_url=extracted_url
+    #         print(extracted_url)
+    #         output =get_forex(extracted_url)
             
-            # output=user_msg(output,'')
-            output=gpt(f'{output} \n\n\n provide info in well format ','if there is any url then attach it in anchor tag ')
-            try:
-                output=format_text(output)
-            except:
-                output=output
-            with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
-                log_data['ai_response'] = output
-                json.dump(log_data, log_file)
-                log_file.write('\n')
-            return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('###', '-->').replace('```html','').replace('```','')})
+    #         # output=user_msg(output,'')
+    #         output=gpt(f'{output} \n\n\n provide info in well format ','if there is any url then attach it in anchor tag ')
+    #         try:
+    #             output=format_text(output)
+    #         except:
+    #             output=output
+    #         with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
+    #             log_data['ai_response'] = output
+    #             json.dump(log_data, log_file)
+    #             log_file.write('\n')
+    #         return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('###', '-->').replace('```html','').replace('```','')})
     
     
-    elif session['section'] =='Ask who is selling crypto asset as what rate' or any(keyword in user_message1.lower() for keyword in ['crypto','bitcoin','crypto asset','current rate','current price']):
-        role="Ask user to provide crypto exchange name \n\n eg : (Binance)"
-        # Load exchange data from JSON file
-        if user_message1:
-            with open('/home/ubuntu/ruedex_ai/exchange_names.json.json', 'r') as f:
-                exchange_data = json.load(f)
-            matched_exchange = None
-            for exchange in exchange_data:
-                if  user_message1.lower() in exchange["name"].lower():
-                    matched_exchange = exchange
-                    break
+    # elif session['section'] =='Ask who is selling crypto asset as what rate' or any(keyword in user_message1.lower() for keyword in ['crypto','bitcoin','crypto asset','current rate','current price']):
+        # role="Ask user to provide crypto exchange name \n\n eg : (Binance)"
+        # # Load exchange data from JSON file
+        # if user_message1:
+        #     with open('/home/ubuntu/ruedex_ai/exchange_names.json.json', 'r') as f:
+        #         exchange_data = json.load(f)
+        #     matched_exchange = None
+        #     for exchange in exchange_data:
+        #         if  user_message1.lower() in exchange["name"].lower():
+        #             matched_exchange = exchange
+        #             break
 
-            # If a matching exchange is found, use its ID to get the table
-            if matched_exchange:
-                exchange_id = matched_exchange["id"]
-            # Check if "binance" is in the user's message
+        #     # If a matching exchange is found, use its ID to get the table
+        #     if matched_exchange:
+        #         exchange_id = matched_exchange["id"]
+        #     # Check if "binance" is in the user's message
             
-                # Provide a clickable link to the Binance exchange page
-                output = f'<a href="{url_for("exchange", exchange_name=exchange_id)}">Sure, here is the link to view {exchange["name"]}</a>'
-                return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
-            else:
-                output='No exchange found in our records'
-        else:
-            output=gpt(section,role)
-        return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
-    elif user_message1=='ruedex':
+        #         # Provide a clickable link to the Binance exchange page
+        #         output = f'<a href="{url_for("exchange", exchange_name=exchange_id)}">Sure, here is the link to view {exchange["name"]}</a>'
+        #         return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
+        #     else:
+        #         output='No exchange found in our records'
+        # else:
+        #     output=gpt(section,role)
+        # return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
+    if user_message1=='ruedex':
         print(intructions)
         try:
             intructions=format_text(intructions)
@@ -375,23 +508,23 @@ def get_ai_response():
         return jsonify({'aiResponse': intructions.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
     
     
-    else:
-        with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'r') as log_file1:
-            # Parse the JSON data
-            lines = log_file1.readlines()
+    # else:
+    #     with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'r') as log_file1:
+    #         # Parse the JSON data
+    #         lines = log_file1.readlines()
 
-            # Parse the last line as JSON
-            last_output = json.loads(lines[-1]) # Assuming the data is stored as a list
+    #         # Parse the last line as JSON
+    #         last_output = json.loads(lines[-1]) # Assuming the data is stored as a list
 
-            # Now you can work with the last row
-            print(last_output)
-        output=gpt(f'{user_message1}',f'this is answer of your last query {last_output}')
-        log_data['ai_response'] = output
-        with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
+    #         # Now you can work with the last row
+    #         print(last_output)
+    #     output=gpt(f'{user_message1}',f'this is answer of your last query {last_output}')
+    #     log_data['ai_response'] = output
+    #     with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
             
-            json.dump(log_data, log_file)
-            log_file.write('\n')
-        return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
+    #         json.dump(log_data, log_file)
+    #         log_file.write('\n')
+    #     return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
 
 
 

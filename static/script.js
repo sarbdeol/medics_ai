@@ -112,11 +112,13 @@ function sendMessage() {
 
         // Append the AI message label and the AI response to the aiMessageContainer
         aiMessageContainer.appendChild(aiLabel);
+        
         aiMessageContainer.appendChild(document.createElement("br")); // Add line break
         aiMessageContainer.appendChild(aiResponseSpan);
-
+        aiMessageContainer.appendChild(document.createElement("hr"));
         // Append the AI message container to the chat output
         chatOutput.appendChild(aiMessageContainer);
+        
 
         // Scroll to the bottom of the chat
         chatOutput.scrollTop = chatOutput.scrollHeight;
@@ -229,9 +231,11 @@ function selectSuggestion(userMessage) {
 
     // Append the AI message label and the AI response to the aiMessageContainer
     aiMessageContainer.appendChild(aiLabel);
+    
     aiMessageContainer.appendChild(document.createElement("br")); // Add line break
+  
     aiMessageContainer.appendChild(aiResponseSpan);
-
+    aiMessageContainer.appendChild(document.createElement("hr"));
     // Append the AI message container to the chat output
     chatOutput.appendChild(aiMessageContainer);
 
