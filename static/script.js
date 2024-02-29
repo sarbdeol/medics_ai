@@ -103,7 +103,7 @@ function sendMessage() {
         // Create a strong element for the AI message label
         var aiLabel = document.createElement("strong");
         aiLabel.classList.add("ai-message");
-        aiLabel.innerHTML = "&#129302; RUEDEX-AI";
+        aiLabel.innerHTML = "RUEDEX";
 
         // Create a span element for the AI response
         var aiResponseSpan = document.createElement("span");
@@ -222,7 +222,7 @@ function selectSuggestion(userMessage) {
     // Create a strong element for the AI message label
     var aiLabel = document.createElement("strong");
     aiLabel.classList.add("ai-message");
-    aiLabel.innerHTML = "&#129302; RUEDEX-AI";
+    aiLabel.innerHTML = "RUEDEX";
 
     // Create a span element for the AI response
     var aiResponseSpan = document.createElement("span");

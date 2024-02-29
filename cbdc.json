@@ -69,7 +69,7 @@
 		"digital_currency" : "Digital Rupee",
 		"type_" : "Retail, Wholesale",
 		"description" : "The Reserve Bank of India is working on a phased implementation of both retail and wholesale CBDC.",
-		"url" : "https://www.ledgerinsights.com/india-cross-border-cbc-us-hong-kong-swift/"
+		"url" : "https://www.pwc.in/research-and-insights-hub/future-of-digital-currency-in-india.html"
 	},
 	{
 		"CBCD_status" : "Proof of concept",
@@ -263,6 +263,15 @@
 	{
 		"CBCD_status" : "Research",
 		"country" : "england",
+		"central_bank" : "Bank of England",
+		"digital_currency" : "Digital Pound",
+		"type_" : "Retail ",
+		"description" : "N/A",
+		"url" : "https://committees.parliament.uk/committee/158/treasury-committee/news/198770/development-of-a-bank-of-england-retail-digital-pound-should-proceed-with-caution-mps-warn/"
+	},
+	{
+		"CBCD_status" : "Research",
+		"country" : "uk",
 		"central_bank" : "Bank of England",
 		"digital_currency" : "Digital Pound",
 		"type_" : "Retail ",
@@ -493,24 +502,6 @@
 		"type_" : "Retail",
 		"description" : "In November 2017, the Bank of Israel Governor Dr. Karnit Flug appointed a team to research the advantages and disadvantages of issuing a central bank digital currency. The findings of the team's research was published a year later, in November 2018, and recommended against issuing a digital currency in the near future. However, the team will continue to monitor significant developments with central bank digital currencies abroad, in order to be prepared to launch a currency, should it become necessary.",
 		"url" : "https://boi.org.il/en/communication-and-publications/press-releases/principles-for-creating-acceptance-and-network-effect-for-a-digital-shekel/"
-	},
-	{
-		"CBCD_status" : "Research",
-		"country" : "United States of America",
-		"central_bank" : "US Federal Reserve",
-		"digital_currency" : "Project Cedar Phase II x Project Ubin+",
-		"type_" : "Wholesale",
-		"description" : "N/A",
-		"url" : "N/A"
-	},
-	{
-		"CBCD_status" : "Research",
-		"country" : "United States of America",
-		"central_bank" : "US Federal Reserve",
-		"digital_currency" : "Wholesale Digital Dollar",
-		"type_" : "Wholesale",
-		"description" : "N/A",
-		"url" : "https://www.federalreserve.gov/econres/notes/feds-notes/examining-cbdc-and-wholesale-payments-20230908.html"
 	},
 	{
 		"CBCD_status" : "Research",
@@ -772,15 +763,6 @@
 		"type_" : "Retail",
 		"description" : "N/A",
 		"url" : "https://www.bis.org/about/bisih/topics/cbdc/icebreaker.htm"
-	},
-	{
-		"CBCD_status" : "Research",
-		"country" : "United States of America",
-		"central_bank" : "US Federal Reserve",
-		"digital_currency" : "Project Cedar",
-		"type_" : "Wholesale",
-		"description" : "N/A",
-		"url" : "https://www.bis.org/about/bisih/locations/nyic.htm \r\nhttps://twitter.com/joshualipsky/status/1570729430817075203 \r\nhttps://www.atlantafed.org/rprf/events/talk-about-payments/2022/06/09/all-about-project-hamilton/transcript.aspx "
 	},
 	{
 		"CBCD_status" : "Research",
@@ -1168,15 +1150,6 @@
 		"type_" : "Retail",
 		"description" : "N/A",
 		"url" : "https://www.youtube.com/watch?v=iATIM_r4ABI"
-	},
-	{
-		"CBCD_status" : "Research",
-		"country" : "United States of America",
-		"central_bank" : "US Federal Reserve",
-		"digital_currency" : "Project Hamilton",
-		"type_" : "N/A",
-		"description" : "Federal Reserve and Massachusetts Institute of Technology's Digital Currency Initiative announced a joint exploration into the use of existing and new technologies to build and test a hypothetical digital currency platform.",
-		"url" : "https://www.bostonfed.org/news-and-events/news/2021/02/how-did-the-feds-digital-dollar-project-get-its-name-project-hamilton.aspx"
 	},
 	{
 		"CBCD_status" : "Research",

@@ -17,7 +17,7 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            max-height: 650px;
+            max-height: 600px;
             overflow-y: auto;
             /* overflow: hidden; */
         }
@@ -94,7 +94,7 @@
         }
 
         /* Adjustments for smaller screens */
-        @media (max-width: 429px) {
+        @media (max-width: 768px) {
             .bottom-input {
                 position: fixed;
                 bottom: 60px; /* Adjust to keep some space above the input */
@@ -121,75 +121,12 @@
                 height: 100%;
                 margin: 0;
                 padding: 0;
-                max-height: 595px;
+                max-height: 480px;
                 overflow-y: auto;
                 /* overflow: hidden; */
             }
         }
-        @media (max-width: 415px) {
-            .bottom-input {
-                position: fixed;
-                bottom: 60px; /* Adjust to keep some space above the input */
-                width: calc(100% - 30px); /* Adjust width */
-                padding: 0 2px;
-                
-            }
 
-            .footer {
-                padding: 15px 0; /* Decrease padding for smaller screens */
-            }
-
-            .suggestion-btn {
-                height: 80px; /* Decrease button height for smaller screens */
-            }
-
-            .mb-3 {
-                margin-bottom: 1rem!important; /* Adjust margin for smaller screens */
-            }
-            .mt-5 {
-                margin-top: 1rem!important;
-            }
-            html, body {
-                height: 100%;
-                margin: 0;
-                padding: 0;
-                max-height: 800px;
-                overflow-y: auto;
-                /* overflow: hidden; */
-            }
-        }
-        @media (max-width: 376px) {
-            .bottom-input {
-                position: fixed;
-                bottom: 40px; /* Adjust to keep some space above the input */
-                width: calc(100% - 30px); /* Adjust width */
-                padding: 0 2px;
-                
-            }
-
-            .footer {
-                padding: 5px 0; /* Decrease padding for smaller screens */
-            }
-
-            .suggestion-btn {
-                height: 80px; /* Decrease button height for smaller screens */
-            }
-
-            .mb-3 {
-                margin-bottom: 1rem!important; /* Adjust margin for smaller screens */
-            }
-            .mt-5 {
-                margin-top: 1rem!important;
-            }
-            html, body {
-                height: 100%;
-                margin: 0;
-                padding: 0;
-                max-height: 618px;
-                overflow-y: auto;
-                /* overflow: hidden; */
-            }
-        }
         /* Adjustments for larger screens */
         @media (min-width: 1200px) {
             .mb-3 {
@@ -279,7 +216,7 @@
     </div>
     <footer class="footer py-3">
         <div class="container text-center">
-            <span class="text-muted">© 2024 ASK RUEDEX. All rights reserved.</span>
+            <span class="text-muted">© 2024 RUEDEX AI. All rights reserved.</span>
         </div>
     </footer>
     
@@ -295,43 +232,15 @@
         }
     </script>
     <script>
-        // Function to scroll the chatOutput element to the bottom
+        // Function to scroll the page to the bottom
         function scrollToBottom() {
-            var chatOutput = document.getElementById('chatOutput');
-            var lastMessage = chatOutput.lastElementChild;
-            if (lastMessage) {
-                lastMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            }
+            window.scrollTo(0, document.body.scrollHeight);
         }
     
-        // Function to observe changes in the chatOutput element
-        function observeChatOutput() {
-            var chatOutput = document.getElementById('chatOutput');
-    
-            // Create a new MutationObserver
-            var observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.type === 'childList') {
-                        // New content added, scroll to bottom
-                        scrollToBottom();
-                    }
-                });
-            });
-    
-            // Configure the observer to watch for changes in child elements
-            var config = { childList: true };
-    
-            // Start observing the target node for configured mutations
-            observer.observe(chatOutput, config);
-        }
-    
-        // Call observeChatOutput when the document is ready
+        // Call scrollToBottom when the document is ready
         document.addEventListener('DOMContentLoaded', function() {
-            observeChatOutput();
-            scrollToBottom(); // Initially scroll to bottom
+            scrollToBottom();
         });
     </script>
-    
-    
 </body>
 </html>

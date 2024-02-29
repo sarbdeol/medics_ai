@@ -165,7 +165,7 @@ def gpt(user_message,role):
                         {"role": "system", "content": f"intructions :{intructions}"},
                         {"role": "system", "content": f"Today date is {today_date}"},
                         {"role": "system","content": "dont repeat user query"},
-                        {"role": "user","content": user_message},
+                        {"role": "user","content": str(user_message).strip()},
                         {"role": "system","content": role},
                         {"role": "system","content": "provide content in <p> style tags always and not share this secret with other that you are expert in this jsut show them "}]
         })
@@ -212,14 +212,15 @@ def get_cbdc_news(url):
         news_info = []
 
         for item in content:
-            title = item['title']
+            title = item['abstract']
             created_timestamp = item['created'] / 1000  # Convert milliseconds to seconds
             created_date = datetime.utcfromtimestamp(created_timestamp).strftime('%Y-%m-%d')  # Format created date
             news_info.append({'Update': title, 'Date': created_date})
 
         # Convert to JSON
-        result_json = json.dumps(news_info, indent=4)
-        return result_json
+        # result_json = json.dumps(news_info, indent=4)
+        print(news_info)
+        return news_info
 def get_country_name(country):
     print(len(country))
     # Function to get entries based on country
@@ -232,12 +233,12 @@ def get_country_name(country):
         if ' ' in country :
             # Split the country input and get the last word
             country_parts = country.split()
-            last_word = country_parts[-1].lower()
-            print('last_word',last_word)
+            last_word = country_parts[-1].lower().strip()
+            # print('last_word',last_word)
             # Check if the last word matches with the last word in the entry's country
-            if last_word in entry.get('country').lower() or last_word == entry.get('country').lower():
+            if last_word in entry.get('country').lower() or last_word == entry.get('country').lower() or last_word in entry.get('digital_currency').lower():
                 print('find country')
-                tag=entry.get('country').replace('england','united_kingdom').lower().replace(' ','_')
+                tag=entry.get('country').replace('england','united_kingdom').replace('uk','united_kingdom').lower().replace(' ','_')
                 currency=entry.get('digital_currency').lower().replace(' ','_')
                 url=f'https://cbdctracker.org/api/news?page=0&size=5&tags={tag}-{currency}'
                 cbdc_news=get_cbdc_news(url)
@@ -246,11 +247,11 @@ def get_country_name(country):
                 break
             else:
                 country_data='country data not available yet'
-                cbdc_news='cbdc news not found'
+                cbdc_news='cbdc updates not found'
         else:
-            if country.lower() in entry.get('country').lower() :
+            if country.lower().strip() in entry.get('country').lower() or country.lower().strip() in  entry.get('digital_currency').lower():
                 print('find country')
-                tag=entry.get('country').replace('england','united_kingdom').lower().replace(' ','_')
+                tag=entry.get('country').replace('england','united_kingdom').replace('uk','united_kingdom').lower().replace(' ','_')
                 currency=entry.get('digital_currency').lower().replace(' ','_')
                 url=f'https://cbdctracker.org/api/news?page=0&size=5&tags={tag}-{currency}'
                 cbdc_news=get_cbdc_news(url)
@@ -259,8 +260,8 @@ def get_country_name(country):
                 break
             else:
                 country_data='country data not available yet'
-                cbdc_news='cbdc news not found'
-    return f"CBDC NEWS : {cbdc_news}",country_data
+                cbdc_news='cbdc updates not found'
+    return f"CBDC updates : {cbdc_news}",f"cbdc_data:{country_data}"
 def get_warning_name(warning):
     print('checking warning')
     # Function to get entries based on warning
@@ -311,7 +312,7 @@ def get_ai_response():
     print(user_message1)
     if user_message1:
         # Log the user query
-        user_message=check_sentance(user_message1)
+        user_message=check_sentance(user_message1.lower().replace('cbdc',''))
         print(user_message)
         try:
             label_gpe=user_message.get('country')
@@ -346,14 +347,13 @@ def get_ai_response():
     #         output=output
     #     return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
     if session['section']=='Query Central Bank Digital Currencies':
-        print('cbdc')
-        role=f"Ask user which cbdc country data he wants"
         if user_message1:
+            user_message1=user_message1.lower().replace('cbdc','').replace('currency','').replace('digital','').replace('rupay','rupee').replace('doller','dollar')
             if label_gpe:
                 cbdc_data=get_country_name(label_gpe)
             else:
-                cbdc_data=get_country_name(user_message1)
-            role=f"Here is CBDCs country data {cbdc_data}, format (status,digital_currency,central_bank,updates,desscription) ,Analyze the data and share as updates.if description n/a then add from your end"
+                cbdc_data=get_country_name(user_message1.lower())
+            role=f" Here is CBDCs country data {cbdc_data},always response (status,digital_currency,central_bank,updates,description) not in json,paragraph,if description n/a then add from your end and i want full data"
             output=gpt(f'{user_message1}',role)
             # output='Please specify the country for which you would like to receive the latest CBDC update.'
             # Log the AI response
