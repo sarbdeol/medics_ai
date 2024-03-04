@@ -427,51 +427,62 @@ def get_ai_response():
     # FOREX
     
 
-    # elif session['section']=='Ask for live forex rates' or any(keyword in user_message1.lower() for keyword in ['forex','usd','inr','eur','gbp']) or any(keyword2 == user_message1.upper() for keyword2 in currency_codes):
-    #     print('forex')
-    #     role="ask user for one time from/to currency and add parameter to this url  https://www.monito.com/en/compare/transfer/{from_country}/{to_country}/{from_currency}/{to_currency}/1 amount always 1 and return url and no confirm again (usa will be us) and use same correncies country codes for to and from country"
-    #     output=gpt(f'{user_message1}',role)
-    #     with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
-    #         log_data['ai_response'] = output
-    #         json.dump(log_data, log_file)
-    #         log_file.write('\n')
-    #     if 'https://www.monito.com' in output:
+    if session['section']=='Ask for live forex rates' or any(keyword in user_message1.lower() for keyword in ['forex','usd','inr','eur','gbp']) or any(keyword2 == user_message1.upper() for keyword2 in currency_codes):
+        print('forex')
+        role="ask user for one time from/to currency and add parameter to this url  https://www.monito.com/en/compare/transfer/{from_country}/{to_country}/{from_currency}/{to_currency}/1 amount return url and no confirm again (usa will be us,ind will be in) and if url then add in anchor tag"
+        output=gpt(f'{user_message1}',role)
+        with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
+            log_data['ai_response'] = output
+            json.dump(log_data, log_file)
+            log_file.write('\n')
+        if 'https://www.monito.com' in output:
         
+            # Parse the HTML
+            soup = BeautifulSoup(output, 'html.parser')
 
-    #         # Given text containing the UR
-    #         # Define a regex pattern to match URLs
-    #         url_pattern = r'https?://(?:www\.)?monito\.com/\S+'
+            # Find the <a> tag
+            a_tag = soup.find('a')
 
-    #         # Find URLs in the text using regex
-    #         urls = re.findall(url_pattern, output)
+            # Extract the href attribute value
+            if a_tag:
+                extracted_url = a_tag.get('href')
+                print("Href URL:", extracted_url)
+            else:
+                print("No <a> tag found in the HTML.")
+                # Given text containing the UR
+                # Define a regex pattern to match URLs
+                url_pattern = r'https?://(?:www\.)?monito\.com/\S+'
 
-    #         # Check if any URLs were found
-    #         if urls:
-    #             # Assuming there is only one URL in the text, extract the first one
-    #             extracted_url = urls[0].replace('"','').replace(')**','').replace('**','').replace(')','').replace('%20','').replace('```html','').replace('```','')
-                
-    #         else:
-    #             print("No URL found in the text.")
-    #         try:
-    #             extracted_url=extracted_url.split("'")[0]
-    #         except:
-    #             extracted_url=extracted_url.split("]")[0]
-    #         else:
-    #             extracted_url=extracted_url
-    #         print(extracted_url)
-    #         output =get_forex(extracted_url)
+                # Find URLs in the text using regex
+                urls = re.findall(url_pattern, output)
+
+                # Check if any URLs were found
+                if urls:
+                    # Assuming there is only one URL in the text, extract the first one
+                    extracted_url = urls[0].replace('"','').replace(')**','').replace('**','').replace(')','').replace('%20','').replace('```html','').replace('```','')
+                    
+                else:
+                    print("No URL found in the text.")
+                try:
+                    extracted_url=extracted_url.split("'")[0]
+                except:
+                    extracted_url=extracted_url.split("]")[0]
+                else:
+                    extracted_url=extracted_url
+                print('extracted_url',extracted_url)
+            output =get_forex(extracted_url)
             
-    #         # output=user_msg(output,'')
-    #         output=gpt(f'{output} \n\n\n provide info in well format ','if there is any url then attach it in anchor tag ')
-    #         try:
-    #             output=format_text(output)
-    #         except:
-    #             output=output
-    #         with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
-    #             log_data['ai_response'] = output
-    #             json.dump(log_data, log_file)
-    #             log_file.write('\n')
-    #         return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('###', '-->').replace('```html','').replace('```','')})
+            # output=user_msg(output,'')
+            output=gpt(f'{output} \n\n\n data is here',f'provide exchange rates for {user_message1} at 1 amount ')
+            try:
+                output=format_text(output)
+            except:
+                output=output
+            with open('/home/ubuntu/ruedex_ai/user_queries_log.json', 'a') as log_file:
+                log_data['ai_response'] = output
+                json.dump(log_data, log_file)
+                log_file.write('\n')
+        return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('###', '-->').replace('```html','').replace('```','')})
     
     
     # elif session['section'] =='Ask who is selling crypto asset as what rate' or any(keyword in user_message1.lower() for keyword in ['crypto','bitcoin','crypto asset','current rate','current price']):
