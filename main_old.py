@@ -13,9 +13,9 @@ from flask_session import Session
 from google_search import google_search
 from check import check_sentance
 # from place_project_bid import sample_place_project_bid
-from cbdc_func import user_cbdc_input
 
-from firms_func import check_registration
+
+
 
 # Get today's date
 today_date = datetime.today().strftime('%Y-%m-%d')
@@ -26,7 +26,10 @@ API_URL = "http://13.49.0.68:5000/cbdctracker_scraper"
 openai.api_key = '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'
 json_file_path = "firms_data.json"
 cbdc_file_path='cbdc.json'
-
+# Open the JSON file for reading
+with open(json_file_path, "r") as file:
+    # Read the contents of the file
+    firms_data = json.load(file)
 # Open the JSON file for reading
 with open(cbdc_file_path, "r") as file:
     # Read the contents of the file
@@ -194,8 +197,109 @@ def format_text(text):
     text = text.replace('\n', "<br>")
     
     return text
+def get_cbdc_news(url):
+    print(url)
+    # Make a GET request to fetch the data
+    response = requests.get(url)
 
+    # Check if the request was successful (status code 200)
+    if response.status_code == 200:
+        # Parse JSON
+        parsed_data = response.json()
 
+        # Extract relevant information
+        content = parsed_data['content']
+        news_info = []
+
+        for item in content:
+            title = item['abstract']
+            created_timestamp = item['created'] / 1000  # Convert milliseconds to seconds
+            created_date = datetime.utcfromtimestamp(created_timestamp).strftime('%Y-%m-%d')  # Format created date
+            news_info.append({'Update': title, 'Date': created_date})
+
+        # Convert to JSON
+        # result_json = json.dumps(news_info, indent=4)
+        print(news_info)
+        return news_info
+def get_country_name(country):
+    print(len(country))
+    # Function to get entries based on country
+    with open(cbdc_file_path, "r") as file:
+        # Read the contents of the file
+        cbdc_data = json.load(file)
+    country_data = []
+    for entry in cbdc_data:
+        # if country.lower() in entry.get('country').lower() :
+        if ' ' in country :
+            # Split the country input and get the last word
+            country_parts = country.split()
+            last_word = country_parts[-1].lower().strip()
+            print('last_word',last_word)
+            # Check if the last word matches with the last word in the entry's country
+            if last_word in entry.get('country').lower() or last_word == entry.get('country').lower() or last_word in entry.get('digital_currency').lower():
+                print('find country')
+                tag=entry.get('country').replace('england','united_kingdom').replace('uk','united_kingdom').lower().replace(' ','_')
+                currency=entry.get('digital_currency').lower().replace(' ','_')
+                url=f'https://cbdctracker.org/api/news?page=0&size=5&tags={tag}-{currency}'
+                cbdc_news=get_cbdc_news(url)
+                print(entry)
+                country_data=entry
+                break
+            else:
+                country_data='country data not available yet'
+                cbdc_news='cbdc updates not found'
+        else:
+            if country.lower().strip() in entry.get('country').lower() or country.lower().strip() in  entry.get('digital_currency').lower():
+                print('find country')
+                tag=entry.get('country').replace('england','united_kingdom').replace('uk','united_kingdom').lower().replace(' ','_')
+                currency=entry.get('digital_currency').lower().replace(' ','_')
+                url=f'https://cbdctracker.org/api/news?page=0&size=5&tags={tag}-{currency}'
+                cbdc_news=get_cbdc_news(url)
+                print(entry)
+                country_data=entry
+                break
+            else:
+                country_data='country data not available yet'
+                cbdc_news='cbdc updates not found'
+    return f"CBDC updates : {cbdc_news}",f"cbdc_data:{country_data}"
+def get_warning_name(warning):
+    print('checking warning')
+    # Function to get entries based on warning
+    with open('fca_warnings.json', "r") as file:
+        # Read the contents of the file
+        cbdc_data = json.load(file)
+    warning_data = []
+    # print(cbdc_data)
+    for entry in cbdc_data:
+        # print(entry.get('name'))
+        if warning.lower() in entry.get('name').lower():
+            print(warning.lower())
+            print('find warning')
+            print(entry)
+            warning_data=entry
+            break
+        else:
+            warning_data=None
+    return warning_data
+def get_firm_name(firm):
+    print('checking firm')
+    # Function to get entries based on warning
+    with open('firms_data.json', "r") as file:
+        # Read the contents of the file
+        cbdc_data = json.load(file)
+    warning_data = []
+    # print(cbdc_data)
+    for entry in cbdc_data:
+        # print(entry.get('name'))
+        if firm.lower() in entry.get('Firm Name').lower():
+            print(firm.lower())
+            print('find firm')
+            print(entry)
+            firm_data=entry
+            break
+        else:
+            firm_data=None
+    return firm_data
 @app.route('/get_ai_response', methods=['POST'])
 def get_ai_response():
     global intructions,currency_codes
@@ -244,13 +348,13 @@ def get_ai_response():
     #     return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
     if session['section']=='Query Central Bank Digital Currencies':
         if user_message1:
-            user_message1=user_message1.lower().replace('cbdc','').replace('currency','').replace('digital','').replace('rupay','rupee').replace('doller','dollar').strip()
+            user_message1=user_message1.lower().replace('cbdc','').replace('currency','').replace('digital','').replace('rupay','rupee').replace('doller','dollar')
             if label_gpe:
-                output=user_cbdc_input(label_gpe)
+                cbdc_data=get_country_name(label_gpe)
             else:
-                output=user_cbdc_input(user_message1)
-           
-            # output=gpt(f'{user_message1}',role)
+                cbdc_data=get_country_name(user_message1.lower())
+            role=f" Here is CBDCs country data {cbdc_data},always response (status,digital_currency,central_bank,updates,description) not in json,paragraph,if description n/a then add from your end and i want full data"
+            output=gpt(f'{user_message1}',role)
             # output='Please specify the country for which you would like to receive the latest CBDC update.'
             # Log the AI response
             log_data['ai_response'] = output
@@ -261,7 +365,7 @@ def get_ai_response():
             #     output=format_text(output)
             # except:
             #     output=output
-            return jsonify({'aiResponse': output})
+            return jsonify({'aiResponse': output.replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
         else:
 
             role=f"Ask user which cbdc country data he wants"
@@ -283,16 +387,29 @@ def get_ai_response():
     if session['section']=='Query FCA registered digital asset companies' :
         print('FCA')
         if user_message1: 
-            # Example usage
-                result = check_registration(user_message1)
-                if result:
-                    if "Registered" in result:
-                        output=result
-                    else:
-                        output=result
-                else:
-                    output=f"No information found for {user_message1}"
-                return jsonify({'aiResponse': output})
+            warning=get_warning_name(user_message1)
+            firms_data=get_firm_name(user_message1)
+            if warning:
+                role=f"provide warning detail to user in format {warning} /n for more info visit https://www.fca.org.uk/consumers/warning-list-unauthorised-firms"
+                output=gpt(f'{user_message1}',role)
+                with open('user_queries_log.json', 'a') as log_file:
+                    log_data['ai_response'] = output
+                    log_file.write('\n')
+                return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
+            if firms_data:
+                firms_data=get_firm_name(user_message1)
+                if firms_data:
+                    role=f"provide firms detail to user in format {firms_data} for more info visit "
+                    output=gpt(f'{user_message1}',role)
+                    with open('user_queries_log.json', 'a') as log_file:
+                        log_data['ai_response'] = output
+                        log_file.write('\n')
+                    return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
+            else:
+                role=f" ask user ,Not found any fca firm or warning list in our data /n fca warning website url here :https://www.fca.org.uk/consumers/warning-list-unauthorised-firms"
+                print(role)
+                output=gpt(f'{user_message1}',role)
+                return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
         else:
             role=f"Ask user to provide full Firm name or fca warnings for checking if its registered or not in FCA registered digital asset companies "
             output=gpt(f'{session["section"]}',role)
@@ -356,7 +473,7 @@ def get_ai_response():
             output =get_forex(extracted_url)
             
             # output=user_msg(output,'')
-            output=gpt(f'{output} \n\n\n data is here',f're write in format to show users')
+            output=gpt(f'{output} \n\n\n data is here',f'provide exchange rates for {user_message1} at 1 amount ')
             try:
                 output=format_text(output)
             except:
