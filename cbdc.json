@@ -69,7 +69,7 @@
 		"digital_currency" : "Digital Rupee",
 		"type_" : "Retail, Wholesale",
 		"description" : "The Reserve Bank of India is working on a phased implementation of both retail and wholesale CBDC.",
-		"url" : "https://www.pwc.in/research-and-insights-hub/future-of-digital-currency-in-india.html"
+		"url" : "https://www.rbi.org.in/"
 	},
 	{
 		"CBCD_status" : "Proof of concept",
@@ -258,7 +258,7 @@
 		"digital_currency" : "Digital Pound",
 		"type_" : "Retail ",
 		"description" : "N/A",
-		"url" : "https://committees.parliament.uk/committee/158/treasury-committee/news/198770/development-of-a-bank-of-england-retail-digital-pound-should-proceed-with-caution-mps-warn/"
+		"url" : "https://www.bankofengland.co.uk/"
 	},
 	{
 		"CBCD_status" : "Research",
@@ -267,7 +267,7 @@
 		"digital_currency" : "Digital Pound",
 		"type_" : "Retail ",
 		"description" : "N/A",
-		"url" : "https://committees.parliament.uk/committee/158/treasury-committee/news/198770/development-of-a-bank-of-england-retail-digital-pound-should-proceed-with-caution-mps-warn/"
+		"url" : "https://www.bankofengland.co.uk/"
 	},
 	{
 		"CBCD_status" : "Research",
@@ -276,7 +276,7 @@
 		"digital_currency" : "Digital Pound",
 		"type_" : "Retail ",
 		"description" : "N/A",
-		"url" : "https://committees.parliament.uk/committee/158/treasury-committee/news/198770/development-of-a-bank-of-england-retail-digital-pound-should-proceed-with-caution-mps-warn/"
+		"url" : "https://www.bankofengland.co.uk/"
 	},
 	{
 		"CBCD_status" : "Research",

@@ -182,7 +182,25 @@ def gpt(user_message,role):
 
 
 import re
-
+def get_warning_name(warning):
+    print('checking warning')
+    # Function to get entries based on warning
+    with open('fca_warnings.json', "r") as file:
+        # Read the contents of the file
+        cbdc_data = json.load(file)
+    warning_data = []
+    # print(cbdc_data)
+    for entry in cbdc_data:
+        # print(entry.get('name'))
+        if warning.lower() in entry.get('name').lower():
+            print(warning.lower())
+            print('find warning')
+            print(entry)
+            warning_data=entry
+            break
+        else:
+            warning_data=None
+    return warning_data
 def format_text(text):
     # Bold text within double asterisks
     text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
@@ -283,7 +301,15 @@ def get_ai_response():
     if session['section']=='Query FCA registered digital asset companies' :
         print('FCA')
         if user_message1: 
+                warning=get_warning_name(user_message1)
             # Example usage
+                if warning:
+                    role=f"provide warning detail to user in format {warning} /n for more info visit https://www.fca.org.uk/consumers/warning-list-unauthorised-firms"
+                    output=gpt(f'{user_message1}',role)
+                    with open('user_queries_log.json', 'a') as log_file:
+                        log_data['ai_response'] = output
+                        log_file.write('\n')
+                    return jsonify({'aiResponse': output.replace('\n', " ").replace('* **', '<strong>').replace('**', '</strong>').replace('```html','').replace('```','')})
                 result = check_registration(user_message1)
                 if result:
                     if "Registered" in result:

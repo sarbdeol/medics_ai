@@ -35,13 +35,14 @@ def check_registration(firm_name):
             # Find the firm data
             for entry in firms_data:
                 if entry["Firm Name"].lower() == matches[0]:
-                    return f'{entry["Firm Name"]} is Registered with {entry["Date"]}'
+                    
+                    return f'{entry["Firm Name"]} is a registered firm with the Financial Conduct Authority. It was registered on {entry["Date"]}'
         else:
-            return "Not Registered", None
+            return "Not Found", None
     else:
         # Check for partial matches
         for entry in firms_data:
             if firm_name.lower() in entry["Firm Name"].lower():
-                return f'{entry["Firm Name"]} is Registered with {entry["Date"]}'
+                return f'{entry["Firm Name"]} is a registered firm with the Financial Conduct Authority. It was registered on {entry["Date"]}'
 
-    return "Not Registered", None
+    return "Not Found", None
