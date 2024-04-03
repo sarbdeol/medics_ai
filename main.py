@@ -16,8 +16,6 @@ today_date = datetime.today().strftime('%Y-%m-%d')
 # from google_bard_api import user_msg
 app = Flask(__name__)
 
-# Set your OpenAI API key
-# openai.api_key = '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'
 import spacy,json
 
 # Preprocessing: Store data in a dictionary
