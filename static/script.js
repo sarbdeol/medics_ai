@@ -51,7 +51,7 @@ function sendMessage() {
     // Create a container for the loading message
     var loadingMessageContainer = document.createElement("div");
     loadingMessageContainer.classList.add("message-container");
-    loadingMessageContainer.innerHTML = '<strong class="message">Ruedex is typing</strong>';
+    loadingMessageContainer.innerHTML = '<strong class="message">typing</strong>';
 
     // Append the user message container to the chat output
     chatOutput.appendChild(userMessageContainer);
@@ -69,7 +69,7 @@ function sendMessage() {
         // Limit the dots to three
         if (currentText.endsWith('....')) {
             // Reset text content if it already ends with four dots
-            messageSpan.innerHTML = '<strong class="message">Ruedex is typing</strong>';
+            messageSpan.innerHTML = '<strong class="message">typing</strong>';
         } else {
             // Add a dot to the text content
             messageSpan.innerHTML += '<strong style="font-size: 1.2em;">.</strong>';
@@ -103,7 +103,7 @@ function sendMessage() {
         // Create a strong element for the AI message label
         var aiLabel = document.createElement("strong");
         aiLabel.classList.add("ai-message");
-        aiLabel.innerHTML = "RUEDEX";
+        aiLabel.innerHTML = "Medics AI";
 
         // Create a span element for the AI response
         var aiResponseSpan = document.createElement("span");
@@ -196,7 +196,7 @@ function selectSuggestion(userMessage) {
     // Create a container for the loading message
     var loadingMessageContainer = document.createElement("div");
     loadingMessageContainer.classList.add("message-container");
-    loadingMessageContainer.innerHTML = '<span class="message">Ruedex is typing....</span>';
+    loadingMessageContainer.innerHTML = '<span class="message">typing....</span>';
 
     // Append the user message container to the chat output
     chatOutput.appendChild(userMessageContainer);
@@ -222,7 +222,7 @@ function selectSuggestion(userMessage) {
     // Create a strong element for the AI message label
     var aiLabel = document.createElement("strong");
     aiLabel.classList.add("ai-message");
-    aiLabel.innerHTML = "RUEDEX";
+    aiLabel.innerHTML = "Medics AI";
 
     // Create a span element for the AI response
     var aiResponseSpan = document.createElement("span");
