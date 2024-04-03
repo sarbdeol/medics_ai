@@ -55,7 +55,7 @@ def rewrite(user_message):
     })
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer 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'
+        'Authorization': 'Bearer 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'
     }
     response = requests.post(url, headers=headers, data=payload)
     output = json.loads(response.text)
